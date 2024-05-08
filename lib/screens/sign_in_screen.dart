@@ -17,13 +17,15 @@ class SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign In'),
+        title: const Center(child: Text('Masuk')),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
+              const Center(
+                  child: Text('Harap isi kolom dibawah untuk melanjutkan')),
               const SizedBox(height: 32.0),
               TextField(
                 controller: _emailController,
@@ -110,7 +112,7 @@ class SignInScreenState extends State<SignInScreen> {
                     );
                   }
                 },
-                child: const Text('Sign In'),
+                child: const Text('Masuk'),
               ),
               const SizedBox(height: 32.0),
               TextButton(
@@ -121,7 +123,7 @@ class SignInScreenState extends State<SignInScreen> {
                         builder: (context) => const SignUpScreen()),
                   );
                 },
-                child: const Text('Don\'t have an account? Sign up'),
+                child: const Text('Tidak punya akun? Daftar disini'),
               ),
             ],
           ),
