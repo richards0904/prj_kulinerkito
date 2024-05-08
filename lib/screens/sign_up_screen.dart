@@ -12,12 +12,13 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _namaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up'),
+        title: const Center(child: Text('Pendaftaran Akun')),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -39,6 +40,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 border: OutlineInputBorder(),
               ),
               obscureText: true,
+            ),
+            const SizedBox(height: 16.0),
+            TextField(
+              controller: _namaController,
+              decoration: const InputDecoration(
+                labelText: 'Nama',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 16.0),
             ElevatedButton(
@@ -84,7 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   );
                 }
               },
-              child: const Text('Sign Up'),
+              child: const Text('Daftar'),
             ),
           ],
         ),
