@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_kulinerkito/screens/add_post_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_in_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -27,6 +28,15 @@ class HomeScreen extends StatelessWidget {
       ),
       body: const Center(
         child: Text('You have logged In'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddPostScreen()),
+          );
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
