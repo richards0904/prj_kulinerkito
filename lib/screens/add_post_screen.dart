@@ -98,7 +98,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
         'description': _descriptionController.text,
         'location': _locationController.text,
         'hours': _hoursController.text,
-        'timestamp': Timestamp.now(),
         'username': user.email ?? 'Anonymous',
       });
 
