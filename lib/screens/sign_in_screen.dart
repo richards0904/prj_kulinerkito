@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_kulinerkito/main.dart';
 import 'package:prj_kulinerkito/screens/home_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_up_screen.dart';
 
@@ -73,7 +74,7 @@ class SignInScreenState extends State<SignInScreen> {
                     // Jika berhasil sign in, navigasi ke halaman beranda
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                          builder: (context) => const HomeScreen()),
+                          builder: (context) => const MainScreen()),
                     );
                   } on FirebaseAuthException catch (error) {
                     print('Error code: ${error.code}');

@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_kulinerkito/screens/home_screen.dart';
 
 class AddPostScreen extends StatefulWidget {
   @override
@@ -13,10 +14,12 @@ class AddPostScreen extends StatefulWidget {
 class _AddPostScreenState extends State<AddPostScreen> {
   File? _image;
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _hoursController = TextEditingController();
   final picker = ImagePicker();
 
-  Future getImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+  Future getImage(ImageSource source) async {
+    final pickedFile = await picker.pickImage(source: source);
 
     setState(() {
       if (pickedFile != null) {
@@ -27,61 +30,145 @@ class _AddPostScreenState extends State<AddPostScreen> {
     });
   }
 
+  void clearImage() {
+    setState(() {
+      _image = null;
+    });
+  }
+
   Future<void> _uploadPost() async {
-    if (_image == null || _descriptionController.text.isEmpty) {
+    if (_image == null ||
+        _descriptionController.text.isEmpty ||
+        _locationController.text.isEmpty ||
+        _hoursController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Image and description are required')),
+        const SnackBar(content: Text('All fields are required')),
       );
       return;
     }
 
-    String imageUrl;
     try {
       final ref = FirebaseStorage.instance
           .ref()
           .child('post_images')
           .child('${DateTime.now()}.jpg');
       await ref.putFile(_image!);
-      imageUrl = await ref.getDownloadURL();
+      String imageUrl = await ref.getDownloadURL();
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You must be logged in to post')),
+        );
+        return;
+      }
+
+      FirebaseFirestore.instance.collection('posts').add({
+        'imageUrl': imageUrl,
+        'description': _descriptionController.text,
+        'location': _locationController.text,
+        'hours': _hoursController.text,
+        'timestamp': Timestamp.now(),
+        'username': user.email ?? 'Anonymous',
+      });
+
+      // Navigate to home screen after successful post
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
     } catch (e) {
       print(e);
-      return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to upload post')),
+      );
     }
-
-    final user = FirebaseAuth.instance.currentUser;
-    final username = user?.email ?? 'Anonymous';
-
-    FirebaseFirestore.instance.collection('posts').add({
-      'imageUrl': imageUrl,
-      'description': _descriptionController.text,
-      'timestamp': Timestamp.now(),
-      'username': username, // Hardcoded username, you can replace this with actual user data
-    });
-
-    Navigator.pop(context);
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Post'),
+        title: const Text('Posting'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+          },
+        ),
+        actions: [
+          if (_image != null)
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                clearImage();
+              },
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: getImage,
-                child: _image == null
-                    ? const Icon(Icons.camera_alt, size: 100)
-                    : Image.file(_image!),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.add_a_photo, size: 50),
+                    onPressed: () => getImage(ImageSource.camera),
+                  ),
+                  const SizedBox(width: 20),
+                  IconButton(
+                    icon: const Icon(Icons.photo_library, size: 50),
+                    onPressed: () => getImage(ImageSource.gallery),
+                  ),
+                ],
               ),
+              if (_image != null) Image.file(_image!),
+              const SizedBox(height: 20),
               TextField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(
+                  labelText: 'Deskripsi',
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.orange),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.location_on, color: Colors.red),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: _locationController,
+                      decoration: const InputDecoration(
+                        labelText: 'Lokasi Tempat',
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.access_time, color: Colors.blue),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: _hoursController,
+                      decoration: const InputDecoration(
+                        labelText: 'Jam Operasional',
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               ElevatedButton(
