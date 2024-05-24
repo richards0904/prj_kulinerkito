@@ -35,32 +35,38 @@ class _AddPostScreenState extends State<AddPostScreen> {
       return;
     }
 
-    String imageUrl;
     try {
       final ref = FirebaseStorage.instance
           .ref()
           .child('post_images')
           .child('${DateTime.now()}.jpg');
       await ref.putFile(_image!);
-      imageUrl = await ref.getDownloadURL();
+      String imageUrl = await ref.getDownloadURL();
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You must be logged in to post')),
+        );
+        return;
+      }
+
+      FirebaseFirestore.instance.collection('posts').add({
+        'imageUrl': imageUrl,
+        'description': _descriptionController.text,
+        'timestamp': Timestamp.now(),
+        'username': user.email ?? 'Anonymous',
+      });
+
+      // Navigate to home screen after successful post
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
     } catch (e) {
       print(e);
-      return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to upload post')),
+      );
     }
-
-    final user = FirebaseAuth.instance.currentUser;
-    final username = user?.email ?? 'Anonymous';
-
-    FirebaseFirestore.instance.collection('posts').add({
-      'imageUrl': imageUrl,
-      'description': _descriptionController.text,
-      'timestamp': Timestamp.now(),
-      'username': username, // Hardcoded username, you can replace this with actual user data
-    });
-
-    Navigator.pop(context);
   }
-
 
   @override
   Widget build(BuildContext context) {
