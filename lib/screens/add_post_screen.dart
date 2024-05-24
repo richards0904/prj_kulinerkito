@@ -18,7 +18,37 @@ class _AddPostScreenState extends State<AddPostScreen> {
   final TextEditingController _hoursController = TextEditingController();
   final picker = ImagePicker();
 
-  Future getImage(ImageSource source) async {
+  Future<void> _pickImage(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pilih Gambar'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Ambil dari Kamera'),
+              onTap: () {
+                _getImage(ImageSource.camera);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Pilih dari Galeri'),
+              onTap: () {
+                _getImage(ImageSource.gallery);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _getImage(ImageSource source) async {
     final pickedFile = await picker.pickImage(source: source);
 
     setState(() {
@@ -109,21 +139,22 @@ class _AddPostScreenState extends State<AddPostScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.add_a_photo, size: 50),
-                    onPressed: () => getImage(ImageSource.camera),
-                  ),
-                  const SizedBox(width: 20),
-                  IconButton(
-                    icon: const Icon(Icons.photo_library, size: 50),
-                    onPressed: () => getImage(ImageSource.gallery),
-                  ),
-                ],
+              Center(
+                child: ElevatedButton(
+                  onPressed: () => _pickImage(context),
+                  child: const Text('Pilih Gambar'),
+                ),
               ),
-              if (_image != null) Image.file(_image!),
+              const SizedBox(height: 20),
+              if (_image != null)
+                Center(
+                  child: Image.file(
+                    _image!,
+                    width: 200, // Set the width to medium size
+                    height: 200, // Set the height to medium size
+                    fit: BoxFit.cover,
+                  ),
+                ),
               const SizedBox(height: 20),
               TextField(
                 controller: _descriptionController,
