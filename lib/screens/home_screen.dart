@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:prj_kulinerkito/screens/add_post_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_in_screen.dart';
+import 'package:prj_kulinerkito/screens/detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -62,10 +63,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
                 return ListView(
                   children: snapshot.data!.docs.map((document) {
-                    return PostCard(
-                      username: document['username'],
-                      imageUrl: document['imageUrl'],
-                      description: document['description'],
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailScreen(
+                              username: document['username'],
+                              imageUrl: document['imageUrl'],
+                              description: document['description'],
+                              location: document['location'],
+                              hours: document['hours'],
+                            ),
+                          ),
+                        );
+                      },
+                      child: PostCard(
+                        username: document['username'],
+                        imageUrl: document['imageUrl'],
+                        description: document['description'],
+                      ),
                     );
                   }).toList(),
                 );
@@ -102,8 +119,17 @@ class PostCard extends StatelessWidget {
             ),
             title: Text(username),
           ),
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Image.network(
+                  imageUrl,
+                ),
           Image.network(
             imageUrl,
+            fit: BoxFit.cover,
+                  height: 150, // Set a fixed height
             frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
               return child;
             },
@@ -125,7 +151,20 @@ class PostCard extends StatelessWidget {
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
-            ),
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.0),
@@ -135,7 +174,7 @@ class PostCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(Icons.thumb_up, color: Colors.red),
-                    const SizedBox(width: 5),
+                    SizedBox(width: 5),
                   ],
                 ),
                 Row(

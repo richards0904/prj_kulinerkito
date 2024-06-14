@@ -31,8 +31,8 @@ class MyApp extends StatelessWidget {
       home: AuthWrapper(),
       routes: {
         '/homescreen': (context) => const HomeScreen(),
-        '/signin': (context) => SignInScreen(),
-        '/signup': (context) => SignUpScreen(),
+        '/signin': (context) => const SignInScreen(),
+        '/signup': (context) => const SignUpScreen(),
         '/addpost': (context) => AddPostScreen(),
       },
     );
@@ -136,7 +136,7 @@ class _MainScreenState extends State<MainScreen> {
           ],
           selectedItemColor: Colors.white,
           unselectedItemColor: Colors.black,
-          unselectedLabelStyle: TextStyle(
+          unselectedLabelStyle: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.normal,
           ),
