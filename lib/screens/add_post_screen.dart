@@ -4,7 +4,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:prj_kulinerkito/screens/home_screen.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:prj_kulinerkito/screens/map_screen.dart';
 
 class AddPostScreen extends StatefulWidget {
   @override
@@ -17,6 +19,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _hoursController = TextEditingController();
   final picker = ImagePicker();
+  LatLng? _pickedLocation;
 
   Future<void> _pickImage(BuildContext context) async {
     showDialog(
@@ -66,6 +69,34 @@ class _AddPostScreenState extends State<AddPostScreen> {
     });
   }
 
+  Future<void> _pickLocation() async {
+    final location = Location();
+    final currentLocation = await location.getLocation();
+    final initialLocation =
+        LatLng(currentLocation.latitude!, currentLocation.longitude!);
+
+    final result = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(
+        builder: (context) => MapScreen(
+          initialLocation: initialLocation,
+          onLocationPicked: (location) {
+            _pickedLocation = location;
+            _locationController.text =
+                'Lat: ${location.latitude}, Lng: ${location.longitude}';
+          },
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _pickedLocation = result;
+        _locationController.text =
+            'Lat: ${result.latitude}, Lng: ${result.longitude}';
+      });
+    }
+  }
+
   Future<void> _uploadPost() async {
     if (_image == null ||
         _descriptionController.text.isEmpty ||
@@ -97,14 +128,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
         'imageUrl': imageUrl,
         'description': _descriptionController.text,
         'location': _locationController.text,
+        'locationLink':
+            'https://www.google.com/maps/search/?api=1&query=${_pickedLocation?.latitude},${_pickedLocation?.longitude}',
         'hours': _hoursController.text,
         'username': user.email ?? 'Anonymous',
       });
 
       // Navigate to home screen after successful post
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to upload post')),
       );
@@ -119,7 +152,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
           },
         ),
         actions: [
@@ -147,11 +181,14 @@ class _AddPostScreenState extends State<AddPostScreen> {
               const SizedBox(height: 20),
               if (_image != null)
                 Center(
-                  child: Image.file(
-                    _image!,
-                    width: 200, // Set the width to medium size
-                    height: 200, // Set the height to medium size
-                    fit: BoxFit.cover,
+                  child: FutureBuilder(
+                    future: Future.delayed(const Duration(seconds: 3)),
+                    builder: (c, s) => s.connectionState == ConnectionState.done
+                        ? Image.file(_image!,
+                          width: 200,
+                          height: 200,
+                          fit: BoxFit.cover,)
+                        : const CircularProgressIndicator(),
                   ),
                 ),
               const SizedBox(height: 20),
@@ -172,12 +209,14 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   Expanded(
                     child: TextField(
                       controller: _locationController,
+                      readOnly: true,
                       decoration: const InputDecoration(
                         labelText: 'Lokasi Tempat',
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.orange),
                         ),
                       ),
+                      onTap: _pickLocation,
                     ),
                   ),
                 ],
