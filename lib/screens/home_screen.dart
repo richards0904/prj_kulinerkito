@@ -6,10 +6,10 @@ import 'package:prj_kulinerkito/screens/sign_in_screen.dart';
 import 'package:prj_kulinerkito/screens/detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Image.asset(
           'images/logo.png',
           width: 50,
-        ), // Logo image asset
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -54,15 +54,20 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Expanded(
-            child: StreamBuilder(
+            child: StreamBuilder<QuerySnapshot>(
               stream:
                   FirebaseFirestore.instance.collection('posts').snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData) {
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                return ListView(
-                  children: snapshot.data!.docs.map((document) {
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('No data available'));
+                }
+                return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var document = snapshot.data!.docs[index];
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -84,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         description: document['description'],
                       ),
                     );
-                  }).toList(),
+                  },
                 );
               },
             ),
@@ -100,7 +105,7 @@ class PostCard extends StatelessWidget {
   final String imageUrl;
   final String description;
 
-  PostCard({
+  const PostCard({
     required this.username,
     required this.imageUrl,
     required this.description,
@@ -119,17 +124,10 @@ class PostCard extends StatelessWidget {
             ),
             title: Text(username),
           ),
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Image.network(
-                  imageUrl,
-                ),
           Image.network(
             imageUrl,
             fit: BoxFit.cover,
-                  height: 150, // Set a fixed height
+            height: 150,
             frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
               return child;
             },
@@ -137,9 +135,7 @@ class PostCard extends StatelessWidget {
               if (loadingProgress == null) {
                 return child;
               } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+                return const Center(child: CircularProgressIndicator());
               }
             },
           ),
@@ -151,20 +147,7 @@ class PostCard extends StatelessWidget {
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
-              Expanded(
-                flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.0),
