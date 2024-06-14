@@ -24,7 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Image.asset('images/logo.png', width: 50,), // Logo image asset
+        title: Image.asset(
+          'images/logo.png',
+          width: 50,
+        ), // Logo image asset
         centerTitle: true,
         actions: [
           IconButton(
@@ -51,7 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Expanded(
             child: StreamBuilder(
-              stream: FirebaseFirestore.instance.collection('posts').snapshots(),
+              stream:
+                  FirebaseFirestore.instance.collection('posts').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
@@ -70,8 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-     
-      
     );
   }
 }
@@ -100,7 +102,21 @@ class PostCard extends StatelessWidget {
             ),
             title: Text(username),
           ),
-          Image.network(imageUrl),
+          Image.network(
+            imageUrl,
+            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+              return child;
+            },
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) {
+                return child;
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            },
+          ),
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: Text(

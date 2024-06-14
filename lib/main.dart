@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:location/location.dart';
 import 'package:prj_kulinerkito/screens/add_post_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_up_screen.dart';
 import 'firebase_options.dart';
@@ -70,6 +71,34 @@ class _MainScreenState extends State<MainScreen> {
     AddPostScreen(),
     // Add other screens here
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeLocation();
+  }
+
+  Future<void> _initializeLocation() async {
+    Location location = Location();
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
