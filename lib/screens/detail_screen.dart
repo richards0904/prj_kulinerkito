@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class DetailScreen extends StatelessWidget {
   final String username;
@@ -47,9 +48,11 @@ class DetailScreen extends StatelessWidget {
                 children: [
                   const Icon(Icons.location_on, color: Colors.red),
                   const SizedBox(width: 10),
-                  Text(
-                    location,
-                    style: const TextStyle(fontSize: 16),
+                  Expanded(
+                    child: Text(
+                      location,
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ),
                 ],
               ),

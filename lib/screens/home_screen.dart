@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:prj_kulinerkito/screens/add_post_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_in_screen.dart';
 import 'package:prj_kulinerkito/screens/detail_screen.dart';
 
@@ -124,20 +123,23 @@ class PostCard extends StatelessWidget {
             ),
             title: Text(username),
           ),
-          Image.network(
-            imageUrl,
-            fit: BoxFit.cover,
-            height: 150,
-            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-              return child;
-            },
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) {
+          Center(
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              height: 150,
+              width: double.infinity,
+              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
                 return child;
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
-            },
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(10.0),
@@ -149,21 +151,34 @@ class PostCard extends StatelessWidget {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.thumb_up, color: Colors.red),
-                    SizedBox(width: 5),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.thumb_up,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {},
+                    ),
+                    Text('0'),
                   ],
                 ),
                 Row(
                   children: [
-                    Icon(Icons.comment, color: Colors.blue),
-                    SizedBox(width: 5),
+                    IconButton(
+                      icon: const Icon(Icons.comment),
+                      color: Colors.blue,
+                      onPressed: () {},
+                    ),
+                    Text('0'),
+                    const SizedBox(
+                      width: 5,
+                    ),
                   ],
                 ),
               ],
