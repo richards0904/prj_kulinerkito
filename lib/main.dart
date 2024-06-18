@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:location/location.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prj_kulinerkito/screens/add_post_screen.dart';
+import 'package:prj_kulinerkito/screens/favorite_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_up_screen.dart';
 import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prj_kulinerkito/screens/sign_in_screen.dart';
 import 'package:prj_kulinerkito/screens/home_screen.dart';
 
@@ -17,7 +18,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         '/signin': (context) => const SignInScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/addpost': (context) => AddPostScreen(),
+        '/favorites': (context) => FavoriteScreen(),
       },
     );
   }
@@ -58,7 +60,7 @@ class AuthWrapper extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const MainScreen({Key? key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -66,10 +68,11 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+
   final List<Widget> _children = [
     const HomeScreen(),
     AddPostScreen(),
-    // Add other screens here
+    FavoriteScreen(),
   ];
 
   @override
@@ -126,7 +129,7 @@ class _MainScreenState extends State<MainScreen> {
               label: 'Posting',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
+              icon: Icon(Icons.bookmark),
               label: 'Favorite',
             ),
             BottomNavigationBarItem(
