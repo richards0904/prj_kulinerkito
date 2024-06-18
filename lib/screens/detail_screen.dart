@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prj_kulinerkito/models/post.dart';
+import 'package:flutter/widgets.dart';
+
 
 class DetailScreen extends StatefulWidget {
   final Post post;
