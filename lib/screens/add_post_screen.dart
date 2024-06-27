@@ -184,10 +184,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   child: FutureBuilder(
                     future: Future.delayed(const Duration(seconds: 3)),
                     builder: (c, s) => s.connectionState == ConnectionState.done
-                        ? Image.file(_image!,
-                          width: 200,
-                          height: 200,
-                          fit: BoxFit.cover,)
+                        ? Image.file(
+                            _image!,
+                            width: 200,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          )
                         : const CircularProgressIndicator(),
                   ),
                 ),
@@ -240,9 +242,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _uploadPost,
-                child: const Text('Post'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _uploadPost,
+                  child: const Text('Post'),
+                ),
               ),
             ],
           ),
