@@ -8,12 +8,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:995038183252:android:dfd2227e12a387a65e52c1",
+        "mobilesdk_app_id": "1:995038183252:android:2cc14417168f44845e52c1",
         "android_client_info": {
           "package_name": "com.example.prj_kulinerkito"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "995038183252-3obghfl3unkiuet03r9u3huart85nuui.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBvLWNYmG2K0CXoJQriwROdT_GVb-_frFQ"
@@ -21,7 +26,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "995038183252-3obghfl3unkiuet03r9u3huart85nuui.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

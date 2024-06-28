@@ -23,9 +23,15 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -45,41 +51,21 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyAw6dTJ5ZAW0B62v8dM8tSnEq3XBMAD8Yo',
-    appId: '1:995038183252:web:53bc8b3d3a0dc6bd5e52c1',
+    appId: '1:995038183252:web:af49a66fe5b69dcb5e52c1',
     messagingSenderId: '995038183252',
     projectId: 'kulinerkito-db',
     authDomain: 'kulinerkito-db.firebaseapp.com',
     databaseURL: 'https://kulinerkito-db-default-rtdb.firebaseio.com',
     storageBucket: 'kulinerkito-db.appspot.com',
-    measurementId: 'G-M5ENG4FN9D',
+    measurementId: 'G-179M132YYE',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBvLWNYmG2K0CXoJQriwROdT_GVb-_frFQ',
-    appId: '1:995038183252:android:dfd2227e12a387a65e52c1',
+    appId: '1:995038183252:android:2cc14417168f44845e52c1',
     messagingSenderId: '995038183252',
     projectId: 'kulinerkito-db',
     databaseURL: 'https://kulinerkito-db-default-rtdb.firebaseio.com',
     storageBucket: 'kulinerkito-db.appspot.com',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDB3V9_YlU6a3IE8VUHObynOOOFQp5LiAo',
-    appId: '1:995038183252:ios:3921c779d832adaa5e52c1',
-    messagingSenderId: '995038183252',
-    projectId: 'kulinerkito-db',
-    databaseURL: 'https://kulinerkito-db-default-rtdb.firebaseio.com',
-    storageBucket: 'kulinerkito-db.appspot.com',
-    iosBundleId: 'com.example.prjKulinerkito',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDB3V9_YlU6a3IE8VUHObynOOOFQp5LiAo',
-    appId: '1:995038183252:ios:f556d6b11d5bda9b5e52c1',
-    messagingSenderId: '995038183252',
-    projectId: 'kulinerkito-db',
-    databaseURL: 'https://kulinerkito-db-default-rtdb.firebaseio.com',
-    storageBucket: 'kulinerkito-db.appspot.com',
-    iosBundleId: 'com.example.prjKulinerkito.RunnerTests',
   );
 }

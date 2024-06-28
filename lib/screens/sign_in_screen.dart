@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prj_kulinerkito/main.dart';
 import 'package:prj_kulinerkito/screens/home_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_up_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -14,6 +15,12 @@ class SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String _errorMessage = '';
+
+  Future<void> _saveLoginStatus(bool isLoggedIn) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', isLoggedIn);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,6 +78,8 @@ class SignInScreenState extends State<SignInScreen> {
                       email: email,
                       password: password,
                     );
+
+                    await _saveLoginStatus(true);
                     // Jika berhasil sign in, navigasi ke halaman beranda
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
@@ -102,7 +111,7 @@ class SignInScreenState extends State<SignInScreen> {
                       );
                     }
                   } catch (error) {
-                    // Tangani kesalahan lain yang tidak terkait denganotentikasi
+                    // Tangani kesalahan lain yang tidak terkait dengan otentikasi
                     setState(() {
                       _errorMessage = error.toString();
                     });

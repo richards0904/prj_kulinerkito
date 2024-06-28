@@ -6,6 +6,7 @@ class Post {
   final String imageUrl;
   final String description;
   final String location;
+  final String locationLink;
   final String hours;
   int likes;
   final List<String> likesUsers;
@@ -19,6 +20,7 @@ class Post {
     required this.imageUrl,
     required this.description,
     required this.location,
+    required this.locationLink,
     required this.hours,
     required this.likes,
     required this.likesUsers,
@@ -35,6 +37,7 @@ class Post {
       imageUrl: data['imageUrl'] ?? '',
       description: data['description'] ?? '',
       location: data['location'] ?? '',
+      locationLink: data['locationLink'] ?? '',
       hours: data['hours'] ?? '',
       likes: data['likes'] ?? 0,
       likesUsers: List<String>.from(data['likesUsers'] ?? []),

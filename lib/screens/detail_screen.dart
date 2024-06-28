@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prj_kulinerkito/models/post.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailScreen extends StatefulWidget {
   final Post post;
@@ -28,16 +28,24 @@ class _DetailScreenState extends State<DetailScreen> {
   void initState() {
     super.initState();
     // Check if the current user has liked this post
-    String userId = FirebaseAuth.instance.currentUser!.uid ;
+    String userId = FirebaseAuth.instance.currentUser!.uid;
     isLiked = widget.post.likesUsers.contains(userId);
     // Check if the current post is bookmarked
     isBookmarked = widget.post.isBookmarked;
   }
 
+  void _launchURL(Uri url) async {
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   void _toggleLike() {
     final postRef =
         FirebaseFirestore.instance.collection('posts').doc(widget.post.id);
-        String userId = FirebaseAuth.instance.currentUser!.uid ;
+    String userId = FirebaseAuth.instance.currentUser!.uid;
 
     if (isLiked) {
       postRef.update({
@@ -107,13 +115,20 @@ class _DetailScreenState extends State<DetailScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Icon(Icons.location_on, color: Colors.red),
+                      const Icon(Icons.location_on, color: Colors.red),
                       const SizedBox(width: 5),
                       Expanded(
-                        child: Text(
-                          widget.post.location,
-                          style: TextStyle(fontSize: 16),
-                          overflow: TextOverflow.ellipsis,
+                        child: InkWell(
+                          onTap: () =>
+                              _launchURL(Uri.parse(widget.post.locationLink)),
+                          child: Text(
+                            widget.post.locationLink,
+                            style: const TextStyle(
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                                fontSize: 16),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
                     ],
@@ -155,7 +170,7 @@ class _DetailScreenState extends State<DetailScreen> {
                       Text(widget.post.comments.length.toString()),
                       IconButton(
                         icon: Icon(
-                          isBookmarked ?  Icons.bookmark : Icons.bookmark_border,
+                          isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                           color: isBookmarked ? Colors.black : null,
                         ),
                         onPressed: () {

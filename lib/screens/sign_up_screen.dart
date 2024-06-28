@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_kulinerkito/main.dart';
 import 'package:prj_kulinerkito/screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -64,21 +66,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   }
 
                   try {
-                    UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                    UserCredential userCredential = await FirebaseAuth.instance
+                        .createUserWithEmailAndPassword(
                       email: email,
                       password: password,
                     );
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    await prefs.setBool('isLoggedIn', false);
 
                     // Set display name for the user
-                    await userCredential.user!.updateDisplayName(_namaController.text.trim());
+                    await userCredential.user!
+                        .updateDisplayName(_namaController.text.trim());
 
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const MainScreen()),
                     );
                   } on FirebaseAuthException catch (e) {
                     if (e.code == 'weak-password') {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Password terlalu lemah.')),
+                        const SnackBar(
+                            content: Text('Password terlalu lemah.')),
                       );
                     } else if (e.code == 'email-already-in-use') {
                       ScaffoldMessenger.of(context).showSnackBar(

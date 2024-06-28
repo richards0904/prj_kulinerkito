@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:prj_kulinerkito/controlers/notification_service.dart';
 import 'package:prj_kulinerkito/screens/sign_in_screen.dart';
 import 'package:prj_kulinerkito/screens/detail_screen.dart';
 import 'package:prj_kulinerkito/models/post.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,17 +16,19 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<Map<String, String>> _favorites = [];
-  Set<String> _likedPosts = {}; // State untuk melacak postingan yang disukai oleh user
+  Set<String> _likedPosts = {};
 
   Future<void> signOut(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
     await FirebaseAuth.instance.signOut();
-
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const SignInScreen()),
     );
   }
 
-  void _addToFavorites(String username, String imageUrl, String description, String location, String hours) {
+  void _addToFavorites(String username, String imageUrl, String description,
+      String location, String hours) {
     setState(() {
       _favorites.add({
         'username': username,
@@ -40,7 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
     if (isLiked) {
       postRef.update({
-        'likes_users': FieldValue.arrayRemove([FirebaseAuth.instance.currentUser?.uid]),
+        'likes_users':
+            FieldValue.arrayRemove([FirebaseAuth.instance.currentUser?.uid]),
         'likes': FieldValue.increment(-1),
       });
       setState(() {
@@ -48,13 +53,20 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } else {
       postRef.update({
-        'likes_users': FieldValue.arrayUnion([FirebaseAuth.instance.currentUser?.uid]),
+        'likes_users':
+            FieldValue.arrayUnion([FirebaseAuth.instance.currentUser?.uid]),
         'likes': FieldValue.increment(1),
       });
       setState(() {
         _likedPosts.add(postId);
       });
     }
+  }
+
+  @override
+  void initState() {
+    PushNotification.getDeviceToken();
+    super.initState();
   }
 
   @override
@@ -91,7 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('posts').snapshots(),
+              stream:
+                  FirebaseFirestore.instance.collection('posts').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -111,7 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       data['comments'] = [];
                     }
                     var post = Post.fromDocument(document);
-                    bool isLiked = _likedPosts.contains(post.id); // Cek apakah postingan sudah disukai oleh user
+                    bool isLiked = _likedPosts.contains(post
+                        .id); // Cek apakah postingan sudah disukai oleh user
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -131,7 +145,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
                         child: Container(
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.orange, width: 2),
@@ -150,14 +165,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                 post.imageUrl,
                                 fit: BoxFit.cover,
                                 height: 250,
-                                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                                frameBuilder: (context, child, frame,
+                                    wasSynchronouslyLoaded) {
                                   return child;
                                 },
-                                loadingBuilder: (context, child, loadingProgress) {
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
                                   if (loadingProgress == null) {
                                     return child;
                                   } else {
-                                    return const Center(child: CircularProgressIndicator());
+                                    return const Center(
+                                        child: CircularProgressIndicator());
                                   }
                                 },
                               ),
@@ -172,18 +190,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
                                         IconButton(
                                           icon: Icon(
-                                            isLiked ? Icons.favorite : Icons.favorite_border,
+                                            isLiked
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
                                             color: isLiked ? Colors.red : null,
                                           ),
-                                          onPressed: () => _toggleLike(post.id, isLiked),
+                                          onPressed: () =>
+                                              _toggleLike(post.id, isLiked),
                                         ),
                                         Text(post.likes.toString()),
                                       ],
@@ -191,14 +214,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Row(
                                       children: [
                                         IconButton(
-                                          icon: const Icon(Icons.comment, color: Colors.blue),
+                                          icon: const Icon(Icons.comment,
+                                              color: Colors.blue),
                                           onPressed: () {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => DetailScreen(
+                                                builder: (context) =>
+                                                    DetailScreen(
                                                   post: post,
-                                                  onFavorite: () => {}, // Implement if needed
+                                                  onFavorite: () =>
+                                                      {}, // Implement if needed
                                                 ),
                                               ),
                                             );
