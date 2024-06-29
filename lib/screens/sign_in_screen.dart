@@ -119,14 +119,15 @@ class SignInScreenState extends State<SignInScreen> {
                     }
                   } catch (error) {
                     // Tangani kesalahan lain yang tidak terkait dengan otentikasi
-                    setState(() {
-                      _errorMessage = error.toString();
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(_errorMessage),
-                      ),
-                    );
+                    // setState(() {
+                    //   _errorMessage = error.toString();
+                    // });
+                    print(error.toString());
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(
+                    //     content: Text(_errorMessage),
+                    //   ),
+                    // );
                   }
                 },
                 child: const Text('Masuk'),
