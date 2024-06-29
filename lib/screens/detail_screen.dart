@@ -161,12 +161,15 @@ class _DetailScreenState extends State<DetailScreen> {
                       ),
                       Text(widget.post.likes.toString()),
                       const SizedBox(width: 10),
-                      IconButton(
-                        icon: const Icon(Icons.comment, color: Colors.blue),
-                        onPressed: () {
-                          _showCommentDialog(context);
-                        },
+                      //
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.comment,
+                          color: Colors.blue,
+                        ),
                       ),
+                      //
                       Text(widget.post.comments.length.toString()),
                       IconButton(
                         icon: Icon(
@@ -273,12 +276,16 @@ class _DetailScreenState extends State<DetailScreen> {
     String username = FirebaseAuth.instance.currentUser!.displayName ?? 'User';
 
     if (commentText.isNotEmpty) {
+      String commentId =
+          FirebaseFirestore.instance.collection('posts').doc().id;
       FirebaseFirestore.instance
           .collection('posts')
           .doc(widget.post.id)
           .update({
         'comments': FieldValue.arrayUnion([
           {
+            'id': commentId,
+            'userId': userId,
             'username': username,
             'text': commentText,
           }
