@@ -82,8 +82,9 @@ class PushNotification {
       'message': {
         'token': deviceToken,
         'notification': {
-          'title': "hi",
-          'body': "hi",
+          'title': "Selamat datang di KulinerKito",
+          'body':
+              "KulinerKito tempat mencari tempat makan terbaik di Palembang",
         },
         'data': {}
       }

@@ -131,7 +131,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         'locationLink':
             'https://www.google.com/maps/search/?api=1&query=${_pickedLocation?.latitude},${_pickedLocation?.longitude}',
         'hours': _hoursController.text,
-        'username': user.email ?? 'Anonymous',
+        'username': user.displayName ?? 'Anonymous',
         'authorId': user.uid,
       });
 
