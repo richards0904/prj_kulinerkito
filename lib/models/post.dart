@@ -9,7 +9,7 @@ class Post {
   final String locationLink;
   final String hours;
   int likes;
-  final List<String> likesUsers;
+  final List<String> likes_users;
   final List<Comment> comments;
   bool isBookmarked;
   bool isLiked; // Tambahkan properti isFavorite
@@ -23,7 +23,7 @@ class Post {
     required this.locationLink,
     required this.hours,
     required this.likes,
-    required this.likesUsers,
+    required this.likes_users,
     required this.comments,
     required this.isBookmarked,
     required this.isLiked, // Tambahkan isFavorite ke constructor
@@ -31,6 +31,8 @@ class Post {
 
   factory Post.fromDocument(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    print('Document Data: $data'); // Debugging
+    print('Likes Users: ${data['likesUsers']}'); // Debugging
     return Post(
       id: doc.id,
       username: data['username'] ?? '',
@@ -40,7 +42,7 @@ class Post {
       locationLink: data['locationLink'] ?? '',
       hours: data['hours'] ?? '',
       likes: data['likes'] ?? 0,
-      likesUsers: List<String>.from(data['likesUsers'] ?? []),
+      likes_users: List<String>.from(data['likes_users'] ?? []),
       comments: _parseComments(data['comments'] ?? []),
       isBookmarked: data['isBookmarked'] ?? false,
       isLiked: data['isLiked'] ?? false, // Inisialisasi isFavorite dari data

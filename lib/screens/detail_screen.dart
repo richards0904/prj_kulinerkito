@@ -29,8 +29,9 @@ class _DetailScreenState extends State<DetailScreen> {
     super.initState();
     // Check if the current user has liked this post
     String userId = FirebaseAuth.instance.currentUser!.uid;
-    isLiked = widget.post.likesUsers.contains(userId);
-    print(isLiked);
+    print(userId);
+    isLiked = widget.post.likes_users.contains(userId);
+    print(widget.post.likes_users);
     // Check if the current post is bookmarked
     isBookmarked = widget.post.isBookmarked;
   }

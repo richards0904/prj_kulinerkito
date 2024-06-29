@@ -84,7 +84,7 @@ class PushNotification {
         'notification': {
           'title': "Selamat datang di KulinerKito",
           'body':
-              "KulinerKito tempat mencari tempat makan terbaik di Palembang",
+              "KulinerKito tempat mencari kuliner terbaik di Palembang",
         },
         'data': {}
       }

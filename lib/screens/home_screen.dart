@@ -63,8 +63,23 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _fetchLikedPosts() async {
+    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    if (userId.isNotEmpty) {
+      var likedPosts = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('likes_users', arrayContains: userId)
+          .get();
+
+      setState(() {
+        _likedPosts = likedPosts.docs.map((doc) => doc.id).toSet();
+      });
+    }
+  }
+
   @override
   void initState() {
+    _fetchLikedPosts();
     PushNotification.getDeviceToken();
     super.initState();
   }
@@ -142,6 +157,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
+                        ).then(
+                          (_) {
+                            setState(() {
+                              _fetchLikedPosts();
+                            });
+                          },
                         );
                       },
                       child: Padding(
