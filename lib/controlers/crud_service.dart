@@ -6,7 +6,8 @@ class CRUDService {
   static Future saveUserToken(String token) async {
     User? user = FirebaseAuth.instance.currentUser;
     Map<String, dynamic> data = {
-      "email": user!.email,
+      "userId": user!.uid,
+      "email": user.email,
       "token": token,
     };
     try {

@@ -132,6 +132,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
             'https://www.google.com/maps/search/?api=1&query=${_pickedLocation?.latitude},${_pickedLocation?.longitude}',
         'hours': _hoursController.text,
         'username': user.email ?? 'Anonymous',
+        'authorId': user.uid,
       });
 
       // Navigate to home screen after successful post

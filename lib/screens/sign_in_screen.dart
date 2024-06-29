@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_kulinerkito/controlers/notification_service.dart';
 import 'package:prj_kulinerkito/main.dart';
 import 'package:prj_kulinerkito/screens/home_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_up_screen.dart';
@@ -79,6 +80,12 @@ class SignInScreenState extends State<SignInScreen> {
                       password: password,
                     );
 
+                    // Kirim notifikasi ke pengguna terkait
+                    String deviceToken =
+                        await PushNotification.getDeviceToken();
+                    ''; // Ganti dengan token perangkat penerima notifikasi
+                    await PushNotification.sendNotificationToSelectedDriver(
+                        deviceToken, context);
                     await _saveLoginStatus(true);
                     // Jika berhasil sign in, navigasi ke halaman beranda
                     Navigator.of(context).pushReplacement(

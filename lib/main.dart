@@ -29,6 +29,7 @@ void main() async {
   );
   await PushNotification.init();
   await PushNotification.localNotiInit();
+  await PushNotification.getDeviceToken();
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
 
   // handle background notif
