@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_kulinerkito/controlers/notification_service.dart';
 import 'package:prj_kulinerkito/main.dart';
 import 'package:prj_kulinerkito/screens/home_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_up_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -14,11 +16,18 @@ class SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String _errorMessage = '';
+
+  Future<void> _saveLoginStatus(bool isLoggedIn) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', isLoggedIn);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Masuk')),
+        automaticallyImplyLeading: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -71,6 +80,14 @@ class SignInScreenState extends State<SignInScreen> {
                       email: email,
                       password: password,
                     );
+
+                    // Kirim notifikasi ke pengguna terkait
+                    String deviceToken =
+                        await PushNotification.getDeviceToken();
+                    ''; // Ganti dengan token perangkat penerima notifikasi
+                    await PushNotification.sendNotificationToSelectedDriver(
+                        deviceToken, context);
+                    await _saveLoginStatus(true);
                     // Jika berhasil sign in, navigasi ke halaman beranda
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
@@ -102,15 +119,16 @@ class SignInScreenState extends State<SignInScreen> {
                       );
                     }
                   } catch (error) {
-                    // Tangani kesalahan lain yang tidak terkait denganotentikasi
-                    setState(() {
-                      _errorMessage = error.toString();
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(_errorMessage),
-                      ),
-                    );
+                    // Tangani kesalahan lain yang tidak terkait dengan otentikasi
+                    // setState(() {
+                    //   _errorMessage = error.toString();
+                    // });
+                    print(error.toString());
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(
+                    //     content: Text(_errorMessage),
+                    //   ),
+                    // );
                   }
                 },
                 child: const Text('Masuk'),

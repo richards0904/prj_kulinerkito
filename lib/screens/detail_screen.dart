@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prj_kulinerkito/models/post.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailScreen extends StatefulWidget {
   final Post post;
@@ -28,16 +28,26 @@ class _DetailScreenState extends State<DetailScreen> {
   void initState() {
     super.initState();
     // Check if the current user has liked this post
-    String userId = FirebaseAuth.instance.currentUser!.uid ;
-    isLiked = widget.post.likesUsers.contains(userId);
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+    print(userId);
+    isLiked = widget.post.likes_users.contains(userId);
+    print(widget.post.likes_users);
     // Check if the current post is bookmarked
     isBookmarked = widget.post.isBookmarked;
+  }
+
+  void _launchURL(Uri url) async {
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   void _toggleLike() {
     final postRef =
         FirebaseFirestore.instance.collection('posts').doc(widget.post.id);
-        String userId = FirebaseAuth.instance.currentUser!.uid ;
+    String userId = FirebaseAuth.instance.currentUser!.uid;
 
     if (isLiked) {
       postRef.update({
@@ -107,13 +117,20 @@ class _DetailScreenState extends State<DetailScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Icon(Icons.location_on, color: Colors.red),
+                      const Icon(Icons.location_on, color: Colors.red),
                       const SizedBox(width: 5),
                       Expanded(
-                        child: Text(
-                          widget.post.location,
-                          style: TextStyle(fontSize: 16),
-                          overflow: TextOverflow.ellipsis,
+                        child: InkWell(
+                          onTap: () =>
+                              _launchURL(Uri.parse(widget.post.locationLink)),
+                          child: Text(
+                            widget.post.locationLink,
+                            style: const TextStyle(
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                                fontSize: 16),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
                     ],
@@ -146,16 +163,19 @@ class _DetailScreenState extends State<DetailScreen> {
                       ),
                       Text(widget.post.likes.toString()),
                       const SizedBox(width: 10),
-                      IconButton(
-                        icon: const Icon(Icons.comment, color: Colors.blue),
-                        onPressed: () {
-                          _showCommentDialog(context);
-                        },
+                      //
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.comment,
+                          color: Colors.blue,
+                        ),
                       ),
+                      //
                       Text(widget.post.comments.length.toString()),
                       IconButton(
                         icon: Icon(
-                          isBookmarked ?  Icons.bookmark : Icons.bookmark_border,
+                          isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                           color: isBookmarked ? Colors.black : null,
                         ),
                         onPressed: () {
@@ -258,12 +278,16 @@ class _DetailScreenState extends State<DetailScreen> {
     String username = FirebaseAuth.instance.currentUser!.displayName ?? 'User';
 
     if (commentText.isNotEmpty) {
+      String commentId =
+          FirebaseFirestore.instance.collection('posts').doc().id;
       FirebaseFirestore.instance
           .collection('posts')
           .doc(widget.post.id)
           .update({
         'comments': FieldValue.arrayUnion([
           {
+            'id': commentId,
+            'userId': userId,
             'username': username,
             'text': commentText,
           }
