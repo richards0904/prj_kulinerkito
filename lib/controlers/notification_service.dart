@@ -72,8 +72,8 @@ class PushNotification {
     return credentials.accessToken.data;
   }
 
-  static sendNotificationToSelectedDriver(
-      String deviceToken, BuildContext context) async {
+  static sendNotificationToSelectedDriver(String deviceToken,
+      BuildContext context, String notificationType, String postId) async {
     final String serverAccessTokenKey = await getAccesToken();
     String endPointFirebaseCloudMessaging =
         "https://fcm.googleapis.com/v1/projects/kulinerkito-db/messages:send";
@@ -82,11 +82,17 @@ class PushNotification {
       'message': {
         'token': deviceToken,
         'notification': {
-          'title': "Selamat datang di KulinerKito",
-          'body':
-              "KulinerKito tempat mencari kuliner terbaik di Palembang",
+          'title': notificationType == "login"
+              ? "Selamat datang di KulinerKito"
+              : "Komentar baru di postingan Anda",
+          'body': notificationType == "login"
+              ? "KulinerKito tempat mencari kuliner terbaik di Palembang"
+              : "Seseorang telah berkomentar di postingan Anda",
         },
-        'data': {}
+        'data': {
+          'type': notificationType,
+          'postId': postId,
+        }
       }
     };
 
@@ -99,7 +105,7 @@ class PushNotification {
       body: jsonEncode(message),
     );
     if (response.statusCode == 200) {
-      print("Notification send succesfuly");
+      print("Notification sent successfully");
     } else {
       print("Failed to send FCM message: ${response.statusCode}");
     }

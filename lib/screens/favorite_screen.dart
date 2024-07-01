@@ -13,11 +13,22 @@ class FavoriteScreen extends StatefulWidget {
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
   late List<Post> _favoritePosts = [];
+  late String _userPhotoUrl = ''; // URL foto profil pengguna
 
   @override
   void initState() {
     super.initState();
+    _fetchUserPhoto();
     _loadFavoritePosts();
+  }
+
+  Future<void> _fetchUserPhoto() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      setState(() {
+        _userPhotoUrl = user.photoURL ?? ''; // Ambil URL foto profil pengguna
+      });
+    }
   }
 
   Future<void> _loadFavoritePosts() async {
@@ -25,7 +36,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('posts')
-        .where('isBookmarked', isEqualTo: true)
+        .where('bookmarkedBy', arrayContains: userId)
         .get();
 
     List<Post> posts =
@@ -40,35 +51,85 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Favorite Posts'),
+        title: const Text('Favorit'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+          },
+        ),
+        
       ),
-      body: _favoritePosts.isEmpty
-          ? Center(
-              child: Text('No favorite posts yet.'),
-            )
-          : ListView.builder(
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Text(
+              'Daftar Tempat Favorit Anda',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
               itemCount: _favoritePosts.length,
               itemBuilder: (context, index) {
-                Post post = _favoritePosts[index];
-                return ListTile(
-                  title: Text(post.username),
-                  subtitle: Text(post.description),
-                  leading: Image.network(post.imageUrl),
+                var post = _favoritePosts[index];
+                return GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => DetailScreen(
                           post: post,
-                          onFavorite:
-                              _loadFavoritePosts, // Reload favorites when coming back from detail
+                          onFavorite: () => {}, // Implement if needed
                         ),
                       ),
                     );
                   },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.orange, width: 2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ListTile(
+                            leading: CircleAvatar(
+                              child: Text(post.username[0]),
+                            ),
+                            title: Text(post.username),
+                          ),
+                          Image.network(
+                            post.imageUrl,
+                            fit: BoxFit.cover,
+                            height: 250,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text(
+                              post.description,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                       
+                        ],
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Post {
   final String id;
+  final String authorId;
   final String username;
   final String imageUrl;
   final String description;
@@ -12,10 +13,12 @@ class Post {
   final List<String> likes_users;
   final List<Comment> comments;
   bool isBookmarked;
-  bool isLiked; // Tambahkan properti isFavorite
+  bool isLiked;
+  final List<String> bookmarkedBy; // Tambahkan ini untuk menyimpan daftar user ID yang telah memfavoritkan
 
   Post({
     required this.id,
+    required this.authorId,
     required this.username,
     required this.imageUrl,
     required this.description,
@@ -26,15 +29,15 @@ class Post {
     required this.likes_users,
     required this.comments,
     required this.isBookmarked,
-    required this.isLiked, // Tambahkan isFavorite ke constructor
+    required this.isLiked,
+    required this.bookmarkedBy, // Tambahkan ini ke constructor
   });
 
   factory Post.fromDocument(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    print('Document Data: $data'); // Debugging
-    print('Likes Users: ${data['likesUsers']}'); // Debugging
     return Post(
       id: doc.id,
+      authorId: data['authorId'] ?? '',
       username: data['username'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
       description: data['description'] ?? '',
@@ -45,7 +48,8 @@ class Post {
       likes_users: List<String>.from(data['likes_users'] ?? []),
       comments: _parseComments(data['comments'] ?? []),
       isBookmarked: data['isBookmarked'] ?? false,
-      isLiked: data['isLiked'] ?? false, // Inisialisasi isFavorite dari data
+      isLiked: data['isLiked'] ?? false,
+      bookmarkedBy: List<String>.from(data['bookmarkedBy'] ?? []), // Inisialisasi dari data
     );
   }
 
@@ -66,7 +70,7 @@ class Post {
     }
   }
 
-  // Update isFavorite ke Firestore
+  // Update isLiked ke Firestore
   Future<void> updateFavoriteStatus(bool isLiked) async {
     try {
       await FirebaseFirestore.instance.collection('posts').doc(id).update({
@@ -78,11 +82,20 @@ class Post {
     }
   }
 
-  // Update isBookmarked ke Firestore
-  Future<void> updateBookmarkStatus(bool isBookmarked) async {
+  // Update isBookmarked dan bookmarkedBy ke Firestore
+  Future<void> updateBookmarkStatus(bool isBookmarked, String userId) async {
     try {
+      if (isBookmarked) {
+        // Tambahkan userId ke bookmarkedBy
+        bookmarkedBy.add(userId);
+      } else {
+        // Hapus userId dari bookmarkedBy
+        bookmarkedBy.remove(userId);
+      }
+
       await FirebaseFirestore.instance.collection('posts').doc(id).update({
         'isBookmarked': isBookmarked,
+        'bookmarkedBy': bookmarkedBy,
       });
     } catch (e) {
       print('Failed to update bookmark status: $e');

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_kulinerkito/controlers/notification_service.dart';
 import 'package:prj_kulinerkito/models/post.dart';
-import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -33,7 +33,7 @@ class _DetailScreenState extends State<DetailScreen> {
     isLiked = widget.post.likes_users.contains(userId);
     print(widget.post.likes_users);
     // Check if the current post is bookmarked
-    isBookmarked = widget.post.isBookmarked;
+    isBookmarked = widget.post.bookmarkedBy.contains(userId);
   }
 
   void _launchURL(Uri url) async {
@@ -81,119 +81,135 @@ class _DetailScreenState extends State<DetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.post.username),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+          },
+        ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.network(
-              widget.post.imageUrl,
-              fit: BoxFit.cover,
-              height: 250,
-              width: MediaQuery.of(context).size.width,
-              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                return child;
-              },
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.orange),
+            borderRadius: BorderRadius.circular(
+                8), // Optional: untuk memberi sudut border
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.network(
+                widget.post.imageUrl,
+                fit: BoxFit.cover,
+                height: 250,
+                width: MediaQuery.of(context).size.width,
+                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
                   return child;
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.post.description,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.post.description,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on, color: Colors.red),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: InkWell(
-                          onTap: () =>
-                              _launchURL(Uri.parse(widget.post.locationLink)),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, color: Colors.red),
+                        const SizedBox(width: 5),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () =>
+                                _launchURL(Uri.parse(widget.post.locationLink)),
+                            child: Text(
+                              widget.post.locationLink,
+                              style: const TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                  fontSize: 16),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(Icons.access_time, color: Colors.blue),
+                        const SizedBox(width: 5),
+                        Expanded(
                           child: Text(
-                            widget.post.locationLink,
-                            style: const TextStyle(
-                                color: Colors.blue,
-                                decoration: TextDecoration.underline,
-                                fontSize: 16),
+                            widget.post.hours,
+                            style: TextStyle(fontSize: 16),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(Icons.access_time, color: Colors.blue),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Text(
-                          widget.post.hours,
-                          style: TextStyle(fontSize: 16),
-                          overflow: TextOverflow.ellipsis,
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            isLiked ? Icons.favorite : Icons.favorite_border,
+                            color: isLiked ? Colors.red : null,
+                          ),
+                          onPressed: () {
+                            _toggleLike();
+                          },
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          isLiked ? Icons.favorite : Icons.favorite_border,
-                          color: isLiked ? Colors.red : null,
+                        Text(widget.post.likes.toString()),
+                        const SizedBox(width: 10),
+                        //
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.comment,
+                            color: Colors.blue,
+                          ),
                         ),
-                        onPressed: () {
-                          _toggleLike();
-                        },
-                      ),
-                      Text(widget.post.likes.toString()),
-                      const SizedBox(width: 10),
-                      //
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.comment,
-                          color: Colors.blue,
+                        //
+                        Text(widget.post.comments.length.toString()),
+                        IconButton(
+                          icon: Icon(
+                            isBookmarked
+                                ? Icons.bookmark
+                                : Icons.bookmark_border,
+                            color: isBookmarked ? Colors.black : null,
+                          ),
+                          onPressed: () {
+                            _toggleBookmark();
+                          },
                         ),
-                      ),
-                      //
-                      Text(widget.post.comments.length.toString()),
-                      IconButton(
-                        icon: Icon(
-                          isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                          color: isBookmarked ? Colors.black : null,
-                        ),
-                        onPressed: () {
-                          _toggleBookmark();
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // Form komentar
-                  _buildCommentForm(),
-                  const SizedBox(height: 20),
-                  // Daftar komentar
-                  _buildCommentList(),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    // Form komentar
+                    _buildCommentForm(),
+                    const SizedBox(height: 20),
+                    // Daftar komentar
+                    _buildCommentList(),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -232,9 +248,18 @@ class _DetailScreenState extends State<DetailScreen> {
       itemCount: widget.post.comments.length,
       itemBuilder: (context, index) {
         Comment comment = widget.post.comments[index];
-        return ListTile(
-          title: Text(comment.username),
-          subtitle: Text(comment.text),
+        return Container(
+          decoration: BoxDecoration(
+            border:
+                Border.all(color: Colors.orange), // Atur warna border di sini
+            borderRadius:
+                BorderRadius.circular(10), // Atur sudut border di sini
+          ),
+          margin: EdgeInsets.symmetric(vertical: 5),
+          child: ListTile(
+            title: Text(comment.username),
+            subtitle: Text(comment.text),
+          ),
         );
       },
     );
@@ -272,7 +297,25 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  void _addComment() {
+  Future<String?> _getUserToken(String authorId) async {
+    try {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('user_data')
+          .doc(authorId)
+          .get();
+
+      if (userSnapshot.exists && userSnapshot.data() != null) {
+        Map<String, dynamic> userData =
+            userSnapshot.data() as Map<String, dynamic>;
+        return userData['token'];
+      }
+    } catch (e) {
+      print('Failed to get user token: $e');
+    }
+    return null;
+  }
+
+  void _addComment() async {
     String commentText = commentController.text;
     String userId = FirebaseAuth.instance.currentUser!.uid;
     String username = FirebaseAuth.instance.currentUser!.displayName ?? 'User';
@@ -292,48 +335,61 @@ class _DetailScreenState extends State<DetailScreen> {
             'text': commentText,
           }
         ])
-      });
+      }).then((_) async {
+        // Get authorID from the post
+        String authorID = widget.post.authorId;
 
-      // Update local UI immediately
-      setState(() {
-        widget.post.comments
-            .add(Comment(username: username, text: commentText));
-        commentController.clear();
+        // Get the token of the author
+        String? authorToken = await _getUserToken(authorID);
+
+        if (authorToken != null) {
+          PushNotification.sendNotificationToSelectedDriver(
+              authorToken, context, "comment", widget.post.id);
+        }
+
+        // Update local UI immediately
+        setState(() {
+          widget.post.comments
+              .add(Comment(username: username, text: commentText));
+          commentController.clear();
+        });
+      }).catchError((error) {
+        print('Failed to add comment: $error');
       });
     }
   }
 
-  void _toggleBookmark() async {
-    bool newIsBookmarked = !isBookmarked;
+  void _toggleBookmark() {
+    final postRef =
+        FirebaseFirestore.instance.collection('posts').doc(widget.post.id);
+    String userId = FirebaseAuth.instance.currentUser!.uid;
 
-    // Update isBookmarked locally
-    setState(() {
-      isBookmarked = newIsBookmarked;
-    });
-
-    // Update Firestore
-    try {
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.post.id)
-          .update({
-        'isBookmarked': newIsBookmarked,
+    if (isBookmarked) {
+      postRef.update({
+        'bookmarkedBy': FieldValue.arrayRemove([userId]),
+        'isBookmarked': false,
+      }).then((_) {
+        setState(() {
+          isBookmarked = false;
+        });
+        // Notify parent (FavoriteScreen) to refresh its data
+        widget.onFavorite();
+      }).catchError((error) {
+        print('Failed to remove bookmark: $error');
       });
-
-      // Update local UI and add to favorites
-      setState(() {
-        if (newIsBookmarked) {
-          widget.onFavorite(); // Add to favorites
-        } else {
-          widget.onFavorite(); // Remove from favorites
-        }
+    } else {
+      postRef.update({
+        'bookmarkedBy': FieldValue.arrayUnion([userId]),
+        'isBookmarked': true,
+      }).then((_) {
+        setState(() {
+          isBookmarked = true;
+        });
+        // Notify parent (FavoriteScreen) to refresh its data
+        widget.onFavorite();
+      }).catchError((error) {
+        print('Failed to add bookmark: $error');
       });
-    } catch (error) {
-      // Revert back isBookmarked locally if update fails
-      setState(() {
-        isBookmarked = !newIsBookmarked;
-      });
-      print('Failed to update bookmark: $error');
     }
   }
 }
