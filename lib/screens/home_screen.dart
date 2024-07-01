@@ -106,12 +106,18 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(10.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Cari tempat kuliner...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+            child: Container(
+              decoration: BoxDecoration(
+                      border: Border.all(color: Colors.orange),
+                      borderRadius: BorderRadius.circular(
+                          8), // Optional: untuk memberi sudut border
+                    ),
+              child: const TextField(
+                decoration: InputDecoration(
+                  hintText: 'Cari tempat kuliner...',
+                  prefixIcon: Icon(Icons.search),
+                  border: InputBorder
+                                  .none,
                 ),
               ),
             ),

@@ -151,7 +151,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       appBar: AppBar(
         title: const Text('Posting'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
             Navigator.of(context)
                 .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
@@ -174,9 +174,28 @@ class _AddPostScreenState extends State<AddPostScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: ElevatedButton(
-                  onPressed: () => _pickImage(context),
-                  child: const Text('Pilih Gambar'),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(
+                      color: Colors.orange,
+                      width: 1.0,
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: 500,
+                    child: InkWell(
+                      onTap: () => _pickImage(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 24.0),
+                        child: const Text(
+                          'Pilih Gambar',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -195,58 +214,130 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   ),
                 ),
               const SizedBox(height: 20),
-              TextField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Deskripsi',
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.orange),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.location_on, color: Colors.red),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: _locationController,
-                      readOnly: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Lokasi Tempat',
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.orange),
-                        ),
-                      ),
-                      onTap: _pickLocation,
+                  const Text(
+                    'Deskripsi Tempat',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.orange),
+                      borderRadius: BorderRadius.circular(
+                          8), // Optional: untuk memberi sudut border
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(Icons.access_time, color: Colors.blue),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: _hoursController,
-                      decoration: const InputDecoration(
-                        labelText: 'Jam Operasional',
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.orange),
+                    child: Row(
+                      children: [
+                        const SizedBox(
+                          width: 36,
                         ),
-                      ),
+                        Expanded(
+                          child: TextField(
+                            controller: _descriptionController,
+                            decoration: const InputDecoration(
+                              hintText: 'Masukkan deskripsi tempat ...',
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Lokasi Tempat',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(
+                      height:
+                          8), // Untuk memberi sedikit jarak antara judul dan baris berikutnya
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.orange),
+                      borderRadius: BorderRadius.circular(
+                          8), // Optional: untuk memberi sudut border
+                    ),
+                    child: Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment.start, // Ratakan ke kiri
+                      children: [
+                        const SizedBox(width: 16),
+                        const Icon(Icons.location_on, color: Colors.red),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: _locationController,
+                            readOnly: true,
+                            decoration: const InputDecoration(
+                              hintText: 'Masukkan Lokasi Tempat ...',
+                              border: InputBorder
+                                  .none, // Hilangkan border TextField
+                            ),
+                            onTap: _pickLocation,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Jam Operasional',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.orange),
+                      borderRadius: BorderRadius.circular(
+                          8), // Optional: untuk memberi sudut border
+                    ),
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 16),
+                        const Icon(Icons.access_time, color: Colors.blue),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: _hoursController,
+                            decoration: const InputDecoration(
+                              hintText: '___:___',
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 130),
               Center(
-                child: ElevatedButton(
-                  onPressed: _uploadPost,
-                  child: const Text('Post'),
+                child: SizedBox(
+                  width: 500, // Sesuaikan lebarnya sesuai kebutuhan
+                  child: ElevatedButton(
+                    onPressed: _uploadPost,
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.blue // Mengatur warna latar belakang tombol
+                        ),
+                    child: const Text('Posting',
+                        style: TextStyle(color: Colors.white)),
+                  ),
                 ),
               ),
             ],

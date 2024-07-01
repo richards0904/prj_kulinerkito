@@ -176,7 +176,7 @@ class _MainScreenState extends State<MainScreen> {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.post_add),
+              icon: Icon(Icons.add_box),
               label: 'Posting',
             ),
             BottomNavigationBarItem(
