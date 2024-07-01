@@ -28,7 +28,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         .where('isBookmarked', isEqualTo: true)
         .get();
 
-    List<Post> posts = snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+    List<Post> posts =
+        snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
 
     setState(() {
       _favoritePosts = posts;
@@ -59,7 +60,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                       MaterialPageRoute(
                         builder: (context) => DetailScreen(
                           post: post,
-                          onFavorite: _loadFavoritePosts, // Reload favorites when coming back from detail
+                          onFavorite:
+                              _loadFavoritePosts, // Reload favorites when coming back from detail
                         ),
                       ),
                     );

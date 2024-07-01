@@ -1,22 +1,20 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:prj_kulinerkito/models/post.dart';
+import 'package:prj_kulinerkito/screens/detail_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  User? _user;
-  String _username = '';
-  String _profileImageUrl = '';
-  int _postCount = 0;
-  int _favoritesCount = 0;
-  List<dynamic> _postImages = [];
+  late User? _currentUser;
+  late List<Post> _userPosts = [];
+  late List<Post> _likedPosts = [];
 
   @override
   void initState() {
@@ -25,49 +23,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    _user = _auth.currentUser;
-
-    if (_user != null) {
-      try {
-        final userDocRef = _firestore.collection('users').doc(_user!.uid);
-        final userData = await userDocRef.get();
-
-        if (userData.exists) {
-          setState(() {
-            _username = userData['displayName'] ?? 'Anonymous';
-            _profileImageUrl = userData['profileImageUrl'] ?? '';
-            _favoritesCount = userData['favorites'] ?? 0;
-            _postCount = userData['postCount'] ??
-                0; // Ambil jumlah postingan dari FireStore
-          });
-
-          // Load gambar-gambar postingan dari Firestore
-          final userPostsQuery = await _firestore
-              .collection('posts')
-              .where('authorId', isEqualTo: _user!.uid)
-              .get();
-
-          setState(() {
-            _postImages = userPostsQuery.docs
-                .map((doc) => doc['imageUrl'] as String)
-                .toList();
-          });
-        } else {
-          setState(() {
-            _username = _user!.displayName ?? 'Anonymous';
-            _profileImageUrl = '';
-            _postCount = 0;
-            _favoritesCount = 0;
-            _postImages = [];
-          });
-        }
-      } catch (e) {
-        print('Error loading user data: $e');
-        setState(() {
-          // Handle error state if needed
-        });
-      }
+    _currentUser = FirebaseAuth.instance.currentUser;
+    if (_currentUser != null) {
+      await _loadUserPosts();
+      await _loadLikedPosts();
     }
+  }
+
+  Future<void> _loadUserPosts() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('authorId', isEqualTo: _currentUser!.uid)
+        .get();
+
+    List<Post> posts =
+        snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+
+    setState(() {
+      _userPosts = posts;
+    });
+  }
+
+  Future<void> _loadLikedPosts() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('likes_users', arrayContains: _currentUser!.uid)
+        .get();
+
+    List<Post> posts =
+        snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+
+    setState(() {
+      _likedPosts = posts;
+    });
   }
 
   @override
@@ -76,62 +64,99 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: Text('Profile'),
       ),
-      body: _user == null
-          ? Center(child: Text('No user logged in'))
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  SizedBox(height: 20),
-                  CircleAvatar(
-                    radius: 50,
-                    // backgroundImage: NetworkImage(_profileImageUrl),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    _username,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          Text('$_postCount', style: TextStyle(fontSize: 18)),
-                          Text('postingan', style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                      SizedBox(width: 20),
-                      Column(
-                        children: [
-                          Text('$_favoritesCount',
-                              style: TextStyle(fontSize: 18)),
-                          Text('difavoritkan', style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Divider(),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: _postImages.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 4,
-                      mainAxisSpacing: 4,
-                    ),
-                    itemBuilder: (context, index) {
-                      return Image.network(
-                        _postImages[index],
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
-                ],
-              ),
+      body: _currentUser == null
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ListView(
+              children: [
+                _buildUserInfo(),
+                _buildUserPosts(),
+                _buildLikedPosts(),
+              ],
             ),
     );
+  }
+
+  Widget _buildUserInfo() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_currentUser!.displayName ?? 'User',
+              style:
+                  const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          Text('Posts: ${_userPosts.length}',
+              style: const TextStyle(fontSize: 18)),
+          const SizedBox(height: 10),
+          Text('Favorite: ${_likedPosts.length}',
+              style: const TextStyle(fontSize: 18)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserPosts() {
+    return _userPosts.isEmpty
+        ? const Center(
+            child: Text('No posts yet.'),
+          )
+        : ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _userPosts.length,
+            itemBuilder: (context, index) {
+              Post post = _userPosts[index];
+              return ListTile(
+                title: Text(post.username),
+                subtitle: Text(post.description),
+                leading: Image.network(post.imageUrl),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailScreen(
+                        post: post,
+                        onFavorite: _loadLikedPosts,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+  }
+
+  Widget _buildLikedPosts() {
+    return _likedPosts.isEmpty
+        ? const Center(
+            child: Text('No liked posts yet.'),
+          )
+        : ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _likedPosts.length,
+            itemBuilder: (context, index) {
+              Post post = _likedPosts[index];
+              return ListTile(
+                title: Text(post.username),
+                subtitle: Text(post.description),
+                leading: Image.network(post.imageUrl),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailScreen(
+                        post: post,
+                        onFavorite: _loadLikedPosts,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          );
   }
 }
