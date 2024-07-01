@@ -47,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadLikedPosts() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('posts')
-        .where('likes_users', arrayContains: _currentUser!.uid)
+        .where('bookmarkedBy', arrayContains: _currentUser!.uid)
         .get();
 
     List<Post> posts =
@@ -62,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: Text('Profil'),
       ),
       body: _currentUser == null
           ? Center(
@@ -72,7 +72,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 _buildUserInfo(),
                 _buildUserPosts(),
-                _buildLikedPosts(),
               ],
             ),
     );
@@ -84,15 +83,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_currentUser!.displayName ?? 'User',
-              style:
-                  const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          CircleAvatar(
+            radius: 50,
+            child: Text(
+              _currentUser!.displayName![0],
+              style: TextStyle(fontSize: 35),
+            ),
+          ),
           const SizedBox(height: 10),
-          Text('Posts: ${_userPosts.length}',
-              style: const TextStyle(fontSize: 18)),
+          Text(
+            _currentUser!.displayName ?? 'User',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            _currentUser!.email ?? 'Email not available',
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
+          ),
           const SizedBox(height: 10),
-          Text('Favorite: ${_likedPosts.length}',
-              style: const TextStyle(fontSize: 18)),
+          Row(
+            children: [
+              Text('Postingan: ${_userPosts.length}',
+                  style: const TextStyle(fontSize: 18)),
+              const SizedBox(width: 20),
+              Text('Favoritkan: ${_likedPosts.length}',
+                  style: const TextStyle(fontSize: 18)),
+            ],
+          ),
         ],
       ),
     );
@@ -103,16 +120,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ? const Center(
             child: Text('No posts yet.'),
           )
-        : ListView.builder(
+        : GridView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+            ),
             itemCount: _userPosts.length,
             itemBuilder: (context, index) {
               Post post = _userPosts[index];
-              return ListTile(
-                title: Text(post.username),
-                subtitle: Text(post.description),
-                leading: Image.network(post.imageUrl),
+              return GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
@@ -124,37 +143,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   );
                 },
-              );
-            },
-          );
-  }
-
-  Widget _buildLikedPosts() {
-    return _likedPosts.isEmpty
-        ? const Center(
-            child: Text('No liked posts yet.'),
-          )
-        : ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: _likedPosts.length,
-            itemBuilder: (context, index) {
-              Post post = _likedPosts[index];
-              return ListTile(
-                title: Text(post.username),
-                subtitle: Text(post.description),
-                leading: Image.network(post.imageUrl),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DetailScreen(
-                        post: post,
-                        onFavorite: _loadLikedPosts,
-                      ),
-                    ),
-                  );
-                },
+                child: Image.network(
+                  post.imageUrl,
+                  fit: BoxFit.cover,
+                ),
               );
             },
           );
