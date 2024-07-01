@@ -273,63 +273,66 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<String?> _getUserToken(String authorId) async {
-  try {
-    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-        .collection('user_data')
-        .doc(authorId)
-        .get();
+    try {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('user_data')
+          .doc(authorId)
+          .get();
 
-    if (userSnapshot.exists && userSnapshot.data() != null) {
-      Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
-      return userData['token'];
-    }
-  } catch (e) {
-    print('Failed to get user token: $e');
-  }
-  return null;
-}
-
-
-void _addComment() async {
-  String commentText = commentController.text;
-  String userId = FirebaseAuth.instance.currentUser!.uid;
-  String username = FirebaseAuth.instance.currentUser!.displayName ?? 'User';
-
-  if (commentText.isNotEmpty) {
-    String commentId = FirebaseFirestore.instance.collection('posts').doc().id;
-    FirebaseFirestore.instance.collection('posts').doc(widget.post.id).update({
-      'comments': FieldValue.arrayUnion([
-        {
-          'id': commentId,
-          'userId': userId,
-          'username': username,
-          'text': commentText,
-        }
-      ])
-    }).then((_) async {
-      // Get authorID from the post
-      String authorID = widget.post.authorId;
-
-      // Get the token of the author
-      String? authorToken = await _getUserToken(authorID);
-
-      if (authorToken != null) {
-        PushNotification.sendNotificationToSelectedDriver(
-          authorToken,
-          context,
-        );
+      if (userSnapshot.exists && userSnapshot.data() != null) {
+        Map<String, dynamic> userData =
+            userSnapshot.data() as Map<String, dynamic>;
+        return userData['token'];
       }
-
-      // Update local UI immediately
-      setState(() {
-        widget.post.comments.add(Comment(username: username, text: commentText));
-        commentController.clear();
-      });
-    }).catchError((error) {
-      print('Failed to add comment: $error');
-    });
+    } catch (e) {
+      print('Failed to get user token: $e');
+    }
+    return null;
   }
-}
+
+  void _addComment() async {
+    String commentText = commentController.text;
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+    String username = FirebaseAuth.instance.currentUser!.displayName ?? 'User';
+
+    if (commentText.isNotEmpty) {
+      String commentId =
+          FirebaseFirestore.instance.collection('posts').doc().id;
+      FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.post.id)
+          .update({
+        'comments': FieldValue.arrayUnion([
+          {
+            'id': commentId,
+            'userId': userId,
+            'username': username,
+            'text': commentText,
+          }
+        ])
+      }).then((_) async {
+        // Get authorID from the post
+        String authorID = widget.post.authorId;
+
+        // Get the token of the author
+        String? authorToken = await _getUserToken(authorID);
+
+        if (authorToken != null) {
+          PushNotification.sendNotificationToSelectedDriver(
+              authorToken, context, "comment", widget.post.id);
+        }
+
+        // Update local UI immediately
+        setState(() {
+          widget.post.comments
+              .add(Comment(username: username, text: commentText));
+          commentController.clear();
+        });
+      }).catchError((error) {
+        print('Failed to add comment: $error');
+      });
+    }
+  }
 
   void _toggleBookmark() async {
     bool newIsBookmarked = !isBookmarked;
