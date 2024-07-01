@@ -17,6 +17,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<Map<String, String>> _favorites = [];
   Set<String> _likedPosts = {};
+  TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
 
   Future<void> signOut(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -77,6 +79,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _updateSearchQuery(String newQuery) {
+    setState(() {
+      _searchQuery = newQuery.toLowerCase();
+    });
+  }
+
   @override
   void initState() {
     _fetchLikedPosts();
@@ -113,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           8), // Optional: untuk memberi sudut border
                     ),
               child: const TextField(
+                controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Cari tempat kuliner...',
                   prefixIcon: Icon(Icons.search),
@@ -120,6 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   .none,
                 ),
               ),
+              onChanged: _updateSearchQuery,
             ),
           ),
           Expanded(
@@ -133,10 +143,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Center(child: Text('No data available'));
                 }
+                var filteredDocs = snapshot.data!.docs.where((doc) {
+                  var data = doc.data() as Map<String, dynamic>;
+                  var description =
+                      (data['description'] ?? '').toString().toLowerCase();
+                  var location =
+                      (data['location'] ?? '').toString().toLowerCase();
+                  var title = (data['title'] ?? '').toString().toLowerCase();
+                  return description.contains(_searchQuery) ||
+                      location.contains(_searchQuery) ||
+                      title.contains(_searchQuery);
+                }).toList();
                 return ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: filteredDocs.length,
                   itemBuilder: (context, index) {
-                    var document = snapshot.data!.docs[index];
+                    var document = filteredDocs[index];
                     var data = document.data() as Map<String, dynamic>;
                     if (!data.containsKey('likes')) {
                       data['likes'] = 0;

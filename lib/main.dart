@@ -10,6 +10,7 @@ import 'package:prj_kulinerkito/screens/add_post_screen.dart';
 import 'package:prj_kulinerkito/screens/detail_screen_with_id.dart';
 import 'package:prj_kulinerkito/screens/favorite_screen.dart';
 import 'package:prj_kulinerkito/screens/message.dart';
+import 'package:prj_kulinerkito/screens/profile_screen.dart';
 import 'package:prj_kulinerkito/screens/sign_up_screen.dart';
 import 'firebase_options.dart';
 import 'package:prj_kulinerkito/screens/sign_in_screen.dart';
@@ -137,6 +138,7 @@ class _MainScreenState extends State<MainScreen> {
     const HomeScreen(),
     AddPostScreen(),
     FavoriteScreen(),
+    ProfileScreen(),
   ];
 
   @override

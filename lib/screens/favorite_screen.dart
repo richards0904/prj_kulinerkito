@@ -39,7 +39,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         .where('bookmarkedBy', arrayContains: userId)
         .get();
 
-    List<Post> posts = snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+    List<Post> posts =
+        snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
 
     setState(() {
       _favoritePosts = posts;
