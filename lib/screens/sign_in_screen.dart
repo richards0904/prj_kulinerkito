@@ -84,9 +84,9 @@ class SignInScreenState extends State<SignInScreen> {
                     // Kirim notifikasi ke pengguna terkait
                     String deviceToken =
                         await PushNotification.getDeviceToken();
-                    ''; // Ganti dengan token perangkat penerima notifikasi
-                    await PushNotification.sendNotificationToSelectedDriver(
-                        deviceToken, context);
+                    ; // Ganti dengan token perangkat penerima notifikasi
+                    // await PushNotification.sendNotificationToSelectedDriver(
+                    //     deviceToken, context, 'login');
                     await _saveLoginStatus(true);
                     // Jika berhasil sign in, navigasi ke halaman beranda
                     Navigator.of(context).pushReplacement(

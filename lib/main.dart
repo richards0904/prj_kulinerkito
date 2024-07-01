@@ -7,6 +7,7 @@ import 'package:location/location.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prj_kulinerkito/controlers/notification_service.dart';
 import 'package:prj_kulinerkito/screens/add_post_screen.dart';
+import 'package:prj_kulinerkito/screens/detail_screen_with_id.dart';
 import 'package:prj_kulinerkito/screens/favorite_screen.dart';
 import 'package:prj_kulinerkito/screens/message.dart';
 import 'package:prj_kulinerkito/screens/sign_up_screen.dart';
@@ -36,7 +37,7 @@ void main() async {
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     if (message.notification != null) {
       print("Background Notification Tapped");
-      navigatorKey.currentState!.pushNamed("/message", arguments: message);
+      _handleMessageNavigation(message.data);
     }
   });
 
@@ -60,10 +61,21 @@ void main() async {
   if (message != null) {
     print("Launched from terminated state");
     Future.delayed(Duration(seconds: 1), () {
-      navigatorKey.currentState!.pushNamed("/message", arguments: message);
+      _handleMessageNavigation(message.data);
     });
   }
   runApp(const MyApp());
+}
+
+void _handleMessageNavigation(Map<String, dynamic> data) {
+  String notificationType = data['type'];
+  String postId = data['postId'];
+
+  if (notificationType == "login") {
+    navigatorKey.currentState!.pushNamed("/profile");
+  } else if (notificationType == "comment") {
+    navigatorKey.currentState!.pushNamed("/detail", arguments: postId);
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -87,6 +99,7 @@ class MyApp extends StatelessWidget {
         '/addpost': (context) => AddPostScreen(),
         '/favorites': (context) => FavoriteScreen(),
         '/message': (context) => Message(),
+        '/detail': (context) => DetailScreenWithId(),
       },
     );
   }

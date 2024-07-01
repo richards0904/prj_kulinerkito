@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Post {
   final String id;
+  final String authorId;
   final String username;
   final String imageUrl;
   final String description;
@@ -17,6 +18,7 @@ class Post {
 
   Post({
     required this.id,
+    required this.authorId,
     required this.username,
     required this.imageUrl,
     required this.description,
@@ -35,6 +37,7 @@ class Post {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Post(
       id: doc.id,
+      authorId: data['authorId'] ?? '',
       username: data['username'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
       description: data['description'] ?? '',
