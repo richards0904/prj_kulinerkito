@@ -53,9 +53,6 @@ void main() async {
         body: message.notification!.body!,
         payload: payloadData,
       );
-
-      // Navigate to the detail page
-      PushNotification.handleMessageNavigation(message.data);
     }
   });
   // handle terminated state

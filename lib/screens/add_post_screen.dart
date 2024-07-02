@@ -20,6 +20,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   final TextEditingController _hoursController = TextEditingController();
   final picker = ImagePicker();
   LatLng? _pickedLocation;
+  bool _isLoading = false;
 
   Future<void> _pickImage(BuildContext context) async {
     showDialog(
@@ -108,6 +109,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
       return;
     }
 
+    setState(() {
+      _isLoading = true; // Set loading to true before uploading
+    });
+
     try {
       final ref = FirebaseStorage.instance
           .ref()
@@ -124,7 +129,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         return;
       }
 
-      FirebaseFirestore.instance.collection('posts').add({
+      await FirebaseFirestore.instance.collection('posts').add({
         'imageUrl': imageUrl,
         'description': _descriptionController.text,
         'location': _locationController.text,
@@ -142,6 +147,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to upload post')),
       );
+    } finally {
+      setState(() {
+        _isLoading = false; // Set loading to false after uploading
+      });
     }
   }
 
@@ -167,181 +176,189 @@ class _AddPostScreenState extends State<AddPostScreen> {
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(
-                      color: Colors.orange,
-                      width: 1.0,
-                    ),
-                  ),
-                  child: SizedBox(
-                    width: 500,
-                    child: InkWell(
-                      onTap: () => _pickImage(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12.0, horizontal: 24.0),
-                        child: const Text(
-                          'Pilih Gambar',
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        border: Border.all(
+                          color: Colors.orange,
+                          width: 1.0,
+                        ),
+                      ),
+                      child: SizedBox(
+                        width: 500,
+                        child: InkWell(
+                          onTap: () => _pickImage(context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12.0, horizontal: 24.0),
+                            child: const Text(
+                              'Pilih Gambar',
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              if (_image != null)
-                Center(
-                  child: FutureBuilder(
-                    future: Future.delayed(const Duration(seconds: 3)),
-                    builder: (c, s) => s.connectionState == ConnectionState.done
-                        ? Image.file(
-                            _image!,
-                            width: 200,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          )
-                        : const CircularProgressIndicator(),
-                  ),
-                ),
-              const SizedBox(height: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Deskripsi Tempat',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.orange),
-                      borderRadius: BorderRadius.circular(
-                          8), // Optional: untuk memberi sudut border
+                  const SizedBox(height: 20),
+                  if (_image != null)
+                    Center(
+                      child: FutureBuilder(
+                        future: Future.delayed(const Duration(seconds: 3)),
+                        builder: (c, s) => s.connectionState == ConnectionState.done
+                            ? Image.file(
+                                _image!,
+                                width: 200,
+                                height: 200,
+                                fit: BoxFit.cover,
+                              )
+                            : const CircularProgressIndicator(),
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        const SizedBox(
-                          width: 36,
+                  const SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Deskripsi Tempat',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        textAlign: TextAlign.left,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.orange),
+                          borderRadius: BorderRadius.circular(
+                              8), // Optional: untuk memberi sudut border
                         ),
-                        Expanded(
-                          child: TextField(
-                            controller: _descriptionController,
-                            decoration: const InputDecoration(
-                              hintText: 'Masukkan deskripsi tempat ...',
-                              border: InputBorder.none,
+                        child: Row(
+                          children: [
+                            const SizedBox(
+                              width: 36,
                             ),
-                          ),
+                            Expanded(
+                              child: TextField(
+                                controller: _descriptionController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Masukkan deskripsi tempat ...',
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Lokasi Tempat',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        textAlign: TextAlign.left,
+                      ),
+                      const SizedBox(
+                          height:
+                              8), // Untuk memberi sedikit jarak antara judul dan baris berikutnya
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.orange),
+                          borderRadius: BorderRadius.circular(
+                              8), // Optional: untuk memberi sudut border
+                        ),
+                        child: Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.start, // Ratakan ke kiri
+                          children: [
+                            const SizedBox(width: 16),
+                            const Icon(Icons.location_on, color: Colors.red),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextField(
+                                controller: _locationController,
+                                readOnly: true,
+                                decoration: const InputDecoration(
+                                  hintText: 'Masukkan Lokasi Tempat ...',
+                                  border: InputBorder
+                                      .none, // Hilangkan border TextField
+                                ),
+                                onTap: _pickLocation,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Jam Operasional',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        textAlign: TextAlign.left,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.orange),
+                          borderRadius: BorderRadius.circular(
+                              8), // Optional: untuk memberi sudut border
+                        ),
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 16),
+                            const Icon(Icons.access_time, color: Colors.blue),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextField(
+                                controller: _hoursController,
+                                decoration: const InputDecoration(
+                                  hintText: '___:___',
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 130),
+                  Center(
+                    child: SizedBox(
+                      width: 500, // Sesuaikan lebarnya sesuai kebutuhan
+                      child: ElevatedButton(
+                        onPressed: _uploadPost,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Colors.blue // Mengatur warna latar belakang tombol
+                            ),
+                        child: const Text('Posting',
+                            style: TextStyle(color: Colors.white)),
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Lokasi Tempat',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(
-                      height:
-                          8), // Untuk memberi sedikit jarak antara judul dan baris berikutnya
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.orange),
-                      borderRadius: BorderRadius.circular(
-                          8), // Optional: untuk memberi sudut border
-                    ),
-                    child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.start, // Ratakan ke kiri
-                      children: [
-                        const SizedBox(width: 16),
-                        const Icon(Icons.location_on, color: Colors.red),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextField(
-                            controller: _locationController,
-                            readOnly: true,
-                            decoration: const InputDecoration(
-                              hintText: 'Masukkan Lokasi Tempat ...',
-                              border: InputBorder
-                                  .none, // Hilangkan border TextField
-                            ),
-                            onTap: _pickLocation,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Jam Operasional',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.orange),
-                      borderRadius: BorderRadius.circular(
-                          8), // Optional: untuk memberi sudut border
-                    ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 16),
-                        const Icon(Icons.access_time, color: Colors.blue),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextField(
-                            controller: _hoursController,
-                            decoration: const InputDecoration(
-                              hintText: '___:___',
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 130),
-              Center(
-                child: SizedBox(
-                  width: 500, // Sesuaikan lebarnya sesuai kebutuhan
-                  child: ElevatedButton(
-                    onPressed: _uploadPost,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.blue // Mengatur warna latar belakang tombol
-                        ),
-                    child: const Text('Posting',
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          if (_isLoading)
+            Center(
+              child: CircularProgressIndicator(),
+            ),
+        ],
       ),
     );
   }
