@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
+
   @override
   SignInScreenState createState() => SignInScreenState();
 }
@@ -25,35 +26,82 @@ class SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Center(child: Text('Masuk')),
-        automaticallyImplyLeading: false,
-      ),
+      backgroundColor: Colors.white, // Warna latar belakang putih
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const SizedBox(height: 60.0),
               const Center(
-                  child: Text('Harap isi kolom dibawah untuk melanjutkan')),
-              const SizedBox(height: 32.0),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+                child: Text(
+                  'Welcome Back,',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ),
-              const SizedBox(height: 16.0),
+              const Center(
+                child: Text(
+                  'Kuliner Kito',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40.0),
+              Center(
+                child: Image.asset(
+                  'images/logo.png',
+                  width: 150,
+                ),
+              ),
+              const SizedBox(height: 40.0),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.email, color: Colors.grey),
+                  labelText: 'Email Address',
+                  hintText: 'Enter your email address',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20.0),
               TextField(
                 controller: _passwordController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.lock, color: Colors.grey),
                   labelText: 'Password',
-                  border: OutlineInputBorder(),
+                  hintText: 'Enter your password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
                 obscureText: true,
               ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () async {
                   final email = _emailController.text.trim();
@@ -84,9 +132,6 @@ class SignInScreenState extends State<SignInScreen> {
                     // Kirim notifikasi ke pengguna terkait
                     String deviceToken =
                         await PushNotification.getDeviceToken();
-                    ; // Ganti dengan token perangkat penerima notifikasi
-                    // await PushNotification.sendNotificationToSelectedDriver(
-                    //     deviceToken, context, 'login');
                     await _saveLoginStatus(true);
                     // Jika berhasil sign in, navigasi ke halaman beranda
                     Navigator.of(context).pushReplacement(
@@ -120,18 +165,21 @@ class SignInScreenState extends State<SignInScreen> {
                     }
                   } catch (error) {
                     // Tangani kesalahan lain yang tidak terkait dengan otentikasi
-                    // setState(() {
-                    //   _errorMessage = error.toString();
-                    // });
                     print(error.toString());
-                    // ScaffoldMessenger.of(context).showSnackBar(
-                    //   SnackBar(
-                    //     content: Text(_errorMessage),
-                    //   ),
-                    // );
                   }
                 },
-                child: const Text('Masuk'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue, // Warna tombol biru
+                  foregroundColor: Colors.white, // Warna teks tombol
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 50.0,
+                    vertical: 15.0,
+                  ),
+                ),
+                child: const Text('Login'),
               ),
               const SizedBox(height: 32.0),
               TextButton(
@@ -142,7 +190,10 @@ class SignInScreenState extends State<SignInScreen> {
                         builder: (context) => const SignUpScreen()),
                   );
                 },
-                child: const Text('Tidak punya akun? Daftar disini'),
+                child: const Text(
+                  'Tidak punya akun? Daftar disini',
+                  style: TextStyle(color: Colors.blue),
+                ),
               ),
             ],
           ),

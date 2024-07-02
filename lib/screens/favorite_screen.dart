@@ -50,7 +50,10 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         title: const Text('Favorit'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
@@ -59,7 +62,6 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                 .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
           },
         ),
-        
       ),
       body: Column(
         children: [
@@ -119,7 +121,6 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                               ),
                             ),
                           ),
-                       
                         ],
                       ),
                     ),

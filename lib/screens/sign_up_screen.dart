@@ -19,41 +19,80 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Center(child: Text('Pendaftaran Akun')),
+        title: Text('Pendaftaran Akun'),
+        backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             children: [
+              const SizedBox(height: 60.0),
+              Center(
+                child: Image.asset(
+                  'images/logo.png', // Path to your image
+                  height: 150.0,
+                ),
+              ),
+              const SizedBox(height: 20.0),
+              const Text(
+                'Daftar Akun',
+                style: TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5.0),
+              const Text(
+                'Isi form ',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  color: Colors.grey,
+                ),
+              ),
               const SizedBox(height: 32.0),
               TextField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'Email Address',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  prefixIcon: const Icon(Icons.email),
                 ),
               ),
               const SizedBox(height: 16.0),
               TextField(
                 controller: _passwordController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Password',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  prefixIcon: const Icon(Icons.lock),
                 ),
                 obscureText: true,
               ),
               const SizedBox(height: 16.0),
               TextField(
                 controller: _namaController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Nama',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  prefixIcon: const Icon(Icons.account_box),
                 ),
               ),
+              
               const SizedBox(height: 16.0),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50.0),
+                  backgroundColor: Colors.blue, // Background color
+                ),
                 onPressed: () async {
                   final email = _emailController.text.trim();
                   final password = _passwordController.text.trim();

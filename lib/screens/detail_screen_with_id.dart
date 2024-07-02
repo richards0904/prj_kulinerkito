@@ -13,7 +13,9 @@ class DetailScreenWithId extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
+            backgroundColor: Colors.white,
             appBar: AppBar(
+              backgroundColor: Colors.white,
               title: Text('Loading...'),
             ),
             body: Center(

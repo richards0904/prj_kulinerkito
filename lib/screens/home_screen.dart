@@ -95,7 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         title: Image.asset(
           'images/logo.png',
           width: 50,
