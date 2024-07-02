@@ -79,10 +79,7 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
         title: Text(widget.post.username),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),

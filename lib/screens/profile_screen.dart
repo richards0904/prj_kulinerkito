@@ -96,11 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white
-        ,title: Text('Profil'),  actions: [
+      appBar: AppBar(title: Text('Profil'), actions: [
         IconButton(
           icon: Icon(
             isDarkMode ? Icons.dark_mode : Icons.light_mode,

@@ -157,10 +157,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
         title: const Text('Posting'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
