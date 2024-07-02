@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:prj_kulinerkito/main.dart';
 import 'package:prj_kulinerkito/models/post.dart';
 import 'package:prj_kulinerkito/screens/detail_screen.dart';
 
@@ -15,11 +16,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late User? _currentUser;
   late List<Post> _userPosts = [];
   late List<Post> _likedPosts = [];
+  bool isDarkMode = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _getDarkMode();
+  }
+
+  Future<void> _saveDarkMode(bool isDarkMode) async {
+    if (_currentUser != null) {
+      await FirebaseFirestore.instance
+          .collection('user_data')
+          .doc(_currentUser!.uid)
+          .set({'isDarkMode': isDarkMode}, SetOptions(merge: true));
+    }
+  }
+
+  Future<void> _getDarkMode() async {
+    if (_currentUser != null) {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('user_data')
+          .doc(_currentUser!.uid)
+          .get();
+      if (snapshot.exists) {
+        setState(() {
+          isDarkMode = snapshot['isDarkMode'] ?? false;
+        });
+      } else {
+        await FirebaseFirestore.instance
+            .collection('user_data')
+            .doc(_currentUser!.uid)
+            .set({'isDarkMode': false}, SetOptions(merge: true));
+        setState(() {
+          isDarkMode = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -61,19 +96,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profil'),
-      ),
-      body: _currentUser == null
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView(
-              children: [
-                _buildUserInfo(),
-                _buildUserPosts(),
-              ],
+      appBar: AppBar(title: Text('Profil'), actions: [
+        IconButton(
+          icon: Icon(
+            isDarkMode ? Icons.dark_mode : Icons.light_mode,
+          ),
+          onPressed: () async {
+            setState(() {
+              _isLoading = true;
+              isDarkMode = !isDarkMode;
+            });
+            await _saveDarkMode(isDarkMode);
+            await Future.delayed(Duration(milliseconds: 500)); // Simulasi delay
+            MyApp.of(context)
+                ?.setThemeMode(isDarkMode ? ThemeMode.dark : ThemeMode.light);
+            setState(() {
+              _isLoading = false;
+            });
+          },
+        ),
+      ]),
+      body: Stack(
+        children: [
+          _currentUser == null
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : ListView(
+                  children: [
+                    _buildUserInfo(),
+                    _buildUserPosts(),
+                  ],
+                ),
+          if (_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
             ),
+        ],
+      ),
     );
   }
 

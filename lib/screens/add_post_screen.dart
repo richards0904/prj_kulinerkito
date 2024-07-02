@@ -191,7 +191,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             vertical: 12.0, horizontal: 24.0),
                         child: const Text(
                           'Pilih Gambar',
-                          style: TextStyle(color: Colors.black),
                         ),
                       ),
                     ),

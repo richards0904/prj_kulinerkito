@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -52,9 +53,11 @@ void main() async {
         body: message.notification!.body!,
         payload: payloadData,
       );
+
+      // Navigate to the detail page
+      PushNotification.handleMessageNavigation(message.data);
     }
   });
-
   // handle terminated state
   final RemoteMessage? message =
       await FirebaseMessaging.instance.getInitialMessage();
@@ -79,8 +82,47 @@ void _handleMessageNavigation(Map<String, dynamic> data) {
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  static _MyAppState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_MyAppState>();
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.light;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDarkMode();
+  }
+
+  Future<void> _loadDarkMode() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+
+      if (snapshot.exists && snapshot['isDarkMode'] != null) {
+        setState(() {
+          _themeMode =
+              snapshot['isDarkMode'] ? ThemeMode.dark : ThemeMode.light;
+        });
+      }
+    }
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +133,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorSchemeSeed: const Color.fromRGBO(86, 80, 14, 171),
+      ),
+      themeMode: _themeMode,
       home: AuthWrapper(),
       navigatorKey: navigatorKey,
       routes: {
@@ -101,6 +149,7 @@ class MyApp extends StatelessWidget {
         '/favorites': (context) => FavoriteScreen(),
         '/message': (context) => Message(),
         '/detail': (context) => DetailScreenWithId(),
+        '/profile': (context) => ProfileScreen(),
       },
     );
   }
@@ -133,6 +182,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  bool _isLoading = false;
 
   final List<Widget> _children = [
     const HomeScreen(),
@@ -169,10 +219,35 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future<void> _onTabTapped(int index) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Simulasikan delay saat memuat halaman baru
+    await Future.delayed(Duration(milliseconds: 500));
+
+    setState(() {
+      _currentIndex = index;
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _children[_currentIndex],
+      body: Stack(
+        children: [
+          _children[_currentIndex],
+          if (_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
+      ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
           canvasColor: Colors.redAccent.shade200,
@@ -180,11 +255,7 @@ class _MainScreenState extends State<MainScreen> {
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
+          onTap: _isLoading ? null : (index) => _onTabTapped(index),
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),

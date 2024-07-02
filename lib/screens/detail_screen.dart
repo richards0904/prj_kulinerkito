@@ -191,7 +191,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             isBookmarked
                                 ? Icons.bookmark
                                 : Icons.bookmark_border,
-                            color: isBookmarked ? Colors.black : null,
+                            color: isBookmarked ? Colors.orange : null,
                           ),
                           onPressed: () {
                             _toggleBookmark();

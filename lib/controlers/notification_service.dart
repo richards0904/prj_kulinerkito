@@ -160,8 +160,19 @@ class PushNotification {
   }
 
   static void onNotificationTap(NotificationResponse notificationResponse) {
-    navigatorKey.currentState!
-        .pushNamed("/message", arguments: notificationResponse);
+    Map<String, dynamic> data = jsonDecode(notificationResponse.payload!);
+    handleMessageNavigation(data);
+  }
+
+  static void handleMessageNavigation(Map<String, dynamic> data) {
+    String notificationType = data['type'];
+    String postId = data['postId'];
+
+    if (notificationType == "login") {
+      navigatorKey.currentState!.pushNamed("/profile");
+    } else if (notificationType == "comment") {
+      navigatorKey.currentState!.pushNamed("/detail", arguments: postId);
+    }
   }
 
   static Future showSimpleNotification({
